@@ -278,7 +278,8 @@ Why is this pattern useful? It is used to collect some small events, and perform
 ```javascript
 var queue = [];
 var job = new DelayedJob(function () {
-  // process queue
+  console.log(queue.join(','));
+  // clear queue
   queue = [];
 });
 
@@ -290,4 +291,9 @@ job.schedule();
 ...
 
 // finally, all the message are processed in one shot
+// printed: something,something more
 ```
+
+## License
+
+MIT/X11 License
