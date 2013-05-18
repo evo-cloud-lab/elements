@@ -1,8 +1,15 @@
 {
     "name": "evo-elements",
-    "description": "EVO Cloud Basic Elements",
+    "description": "Evo Cloud Basic Elements",
     "version": "0.0.1",
-    "author": "EaseWay Hu <easeway@gmail.com>",
+    "author": "Yisui Hu <easeway@gmail.com>",
+    "keywords": [
+        "elements",
+        "class", "object-oriented", "OOP",
+        "log", "logging", "trace",
+        "configuration",
+        "schedule"
+    ],
     "repository": {
         "type": "git",
         "url": "https://github.com/evo-cloud/elements"
@@ -13,5 +20,15 @@
         "js-yaml": "2.0.5",
         "optimist": "0.4.0",
         "debug": "0.7.2"
-    }
+    },
+    "engines": {
+        "node": ">=0.8",
+        "npm": "1"
+    },
+    "licenses": [
+        {
+            "type": "MIT",
+            "url": "https://github.com/evo-cloud/elements/raw/master/LICENSE"
+        }
+    ]
 }
