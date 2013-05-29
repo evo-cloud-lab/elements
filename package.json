@@ -16,6 +16,7 @@
     },
     "main": "./index",
     "dependencies": {
+        "js-class": "0.0.1",
         "underscore": "1.4.4",
         "js-yaml": "2.0.5",
         "optimist": "0.4.0",
