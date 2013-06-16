@@ -5,10 +5,12 @@
 This package includes common and basic building elements for all evo projects.
 
 In this version, it includes:
+- Logger: logging infrastructure using syslog levels
+- Config: a simple configuration framework to release you from writing similar code in projects
 - Trace: simple console logging with predefined levels and customizable component names
 - States: a basic framework for building a state machine
-- Config: a simple configuration framework to release you from writing similar code in projects
 - DelayedJob: ensure a postponed job won't be scheduled multiple times
+- Try: simple try/catch block wrapper to save you writing try/catch by routing exception to callback
 
 ## Install
 
@@ -30,6 +32,97 @@ var elements = require('evo-elements');
 ```
 
 ## How to Use
+
+### Logger
+
+The usage is very simple by:
+
+```javascript
+logger = new Logger('componentName', 'prefix'); // prefix is optional
+logger.emerg(...);  // aliases: emergent, fatal
+logger.alert(...); 
+logger.crit(...);   // aliases: critical
+logger.error(...);  // aliases: err
+logger.warning(...);// aliases: warn
+logger.notice(...);
+logger.info(...);   // aliases: verbose
+logger.debug(...);  // aliases: dbg
+```
+
+The arguments are same as `util.format(...)`.
+
+The logging drivers and levels are provided by `Config.conf()`. The schema is like:
+
+```javascript
+{
+    logger: {
+        default: {  // this is default configuration
+            level: 'default log level' // default is 'notice'
+        },
+        componentName: {
+            level: 'component-specific level'
+        },
+        drivers: {  // select logging drivers
+            driverId1: {
+                driver: 'console',  // use console driver
+                options: {          // console specific options
+                    json: true,     // optional
+                    level: 'debug', // console driver specific level
+                }
+            },
+            driverId2: {
+                driver: 'file',     // use file driver
+                options: {
+                    filename: 'logfile.log'
+                }
+            },
+            ...
+        }
+    }
+}
+```
+
+`Logger` is backed by [winston](http://npmjs.org/package/winston) package.
+
+### Config
+
+A simple configuration framework to load settings from command line arguments and configuration files.
+It also provides a global settings object to be shared by all the modules in one project.
+When using this, we don't need to write logic for parsing command line and loading and configuration files.
+
+the configuration can always be shared in modules by
+
+```javascript
+var conf = require('evo-elements').Config.conf();
+```
+
+Usually in the main script, use
+
+```javascript
+var conf = require('evo-elements').Config.conf(myArgv);
+```
+
+to parse from specified arguments instead of `process.argv`.
+
+Then, use `conf.opts` to access all the setting options.
+
+All command line arguments follow the unified schema:
+
+- `-c CONFIG_FILE`: merge configurations from file, the file can be `json` or `yaml` determined by extension;
+- `-C CONFIG_FILE`: load configurations from file, but replace all top-level keys with new values instead of merging;
+- `-D KEY_PATH=VAL`: set a value for a key. KEY_PATH is like `key1.key2.keyN` from top-level;
+- `--KEY=VAL`: set a value for a top-level key.
+
+The `VAL` above can be in the format like:
+
+- `true` or `false`: interpreted as `true` or `false`;
+- Numeric value: interpreted by `parseInt` or `parseFloat`;
+- `"string"`: quoted string, treated as a JSON string value;
+- `{ ... }`: a JSON object;
+- `[ ... ]`: a JSON array;
+- `string`: a simple string;
+- `@filename`: load values from configuration file;
+- Empty value: interpreted as `undefined`.
 
 ### Trace
 
@@ -94,33 +187,6 @@ state.leave(nextState)
 
 Invoked when the state machine transits to `nextState` before invoking `nextState.enter`.
 
-### Config
-
-A simple configuration framework to load settings from command line arguments and configuration files.
-It also provides a global settings object to be shared by all the modules in one project.
-When using this, we don't need to write logic for parsing command line and loading and configuration files.
-
-the configuration can always be shared in modules by
-
-```javascript
-var conf = require('evo-elements').Config.conf;
-```
-
-Usually in the main script, use
-
-```javascript
-var conf = require('evo-elements').Config.parse(myArgv).conf;
-```
-
-to parse from specified arguments instead of `process.argv`.
-
-Then, use `conf.opts` to access all the setting options.
-
-Only one command line option is reserved: `-c CONFIG_FILE` or `--config CONFIG_FILE` for long option form.
-The `CONFIG_FILE` must be a YAML file, and all the keys are merged into `conf.opts`.
-For other options like `--option VALUE` or `--option=VALUE` will become: `conf.opts[option] = VALUE`.
-`VALUE` is automatically parsed into `Number`, `String` or `Boolean`, if you want to specify a JSON, use `--option=json:JSON_STRING`.
-
 ### DelayedJob
 
 If you know `process.nextTick` or `setTimeout`, then you know what a `DelayedJob` instance does.
@@ -160,6 +226,66 @@ job.schedule();
 // finally, all the message are processed in one shot
 // printed: something,something more
 ```
+
+### Try
+
+It is a simple try/catch wrapper to route the exception to a specified handler. First create a `Try` instance:
+
+```javascript
+var tries = new Try(exceptionHandlerFn);
+```
+
+Then, perform you logic:
+
+```javascript
+tries.tries(function () {
+    // do some logic, or throw something
+});
+
+// or with multiple functions executed one-by-one
+tries.tries([
+    function () {
+        // do something
+    },
+    function () {
+        // do something more
+    },
+    ...
+]);
+```
+
+If nothing is thrown, all functions get executed.
+Otherwise, `exceptionHandlerFn` passed to constructor will be called with exception, and the following functions are not executed.
+
+The returned value follows the schema:
+
+```javascript
+{
+    ok: true/false, // to indicate if any error is caught
+    error: error object, // only present when ok is false
+    result: returned value by tried functions   // it is an array if the passed in argument is an array
+}
+```
+
+If you want the `exceptionHandlerFn` always be called even there is nothing thrown, use:
+
+```javascript
+tries.final(function () { ... });
+// or
+tries.final([function () { ... }, function () { ... }, ...]);
+```
+
+There are two static methods which avoids creating the object:
+
+```javascript
+Try.tries(fn, exceptionHandler, final);
+// fn can be a single function or an array of functions
+// final is optional, if true, it invokes final instead of tries
+Try.final(fn, exceptionHandler);
+// simple wrapper for final
+```
+
+This is very used especially in [mocha](http://npmjs.org/package/mocha) async tests to check something in a callback.
 
 ## License
 

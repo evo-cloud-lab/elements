@@ -10,6 +10,9 @@
         "configuration",
         "schedule"
     ],
+    "scripts": {
+        "test": "mocha --reporter spec test/*-test.js"
+    },    
     "repository": {
         "type": "git",
         "url": "https://github.com/evo-cloud/elements"
@@ -23,6 +26,10 @@
         "winston-syslog": "0.2.2",
         "debug": "0.7.2"
     },
+    "devDependencies": {
+        "mocha": "1.10.0",
+        "sandboxed-module": "0.2.0"
+    },    
     "engines": {
         "node": ">=0.8",
         "npm": "1"
