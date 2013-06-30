@@ -4,10 +4,11 @@ A state machine with readable DSL.
 
 ```javascript
 var stateMachine = new StateMachine()
+        .error('error')                     // this declares the global error state
         .state('error', new ErrorState())
-        .error('error')
         .state('state1', new State1())
             .when('loaded').to('state2')
+            .error('error')                 // this is error transition for state1
         .state('state2', new State2())
             .when(/.+-ready$/).to('work')
             .when(['failure', 'failed']).to('state2')
