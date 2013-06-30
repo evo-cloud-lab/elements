@@ -11,6 +11,7 @@ In this version, it includes:
 - Config: a simple configuration framework to release you from writing similar code in projects;
 - DelayedJob: ensure a postponed job won't be scheduled multiple times;
 - Logger: logging infrastructure using syslog levels;
+- StateMachine: a state machine with easy-to-use DSL;
 - States: a basic framework for building a state machine;
 - Trace: simple console logging with predefined levels and customizable component names;
 - Try: simple try/catch block wrapper to save you writing try/catch by routing exception to callback.
