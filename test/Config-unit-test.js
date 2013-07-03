@@ -47,6 +47,8 @@ describe('Config', function () {
     it('#parse definitions', function () {
         cfg.parse(['-D', 'a.b.c=ok']);
         assert.deepEqual(cfg.opts, { a: { b: { c: 'ok' } } });
+        cfg.parse(['--a-b-c=good']);
+        assert.deepEqual(cfg.opts, { a: { b: { c: 'good' } } });        
         cfg.parse(['-D', 'a.b.c=']);
         assert.deepEqual(cfg.opts, { a: { b: { } } });
     });
@@ -56,6 +58,8 @@ describe('Config', function () {
         assert.deepEqual(cfg.opts, { a: { b: { c: 'ok' } } });
         cfg.parse(['-D', 'a.b+={ "d": 1 }']);
         assert.deepEqual(cfg.opts, { a: { b: { c: 'ok', d: 1 } } });
+        cfg.parse(['-D', 'a.b={ "d": 1 }']);
+        assert.deepEqual(cfg.opts, { a: { b: { d: 1 } } });        
     });
     
     it('#parse args', function () {
