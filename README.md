@@ -10,7 +10,9 @@ In this version, it includes:
 - BiMap: a bi-directional map which maps a key entity <key1, key2> to a value;
 - Config: a simple configuration framework to release you from writing similar code in projects;
 - DelayedJob: ensure a postponed job won't be scheduled multiple times;
+- Errors: unified error representation;
 - Logger: logging infrastructure using syslog levels;
+- Schema: data object validation and normalization;
 - StateMachine: a state machine with easy-to-use DSL;
 - States: a basic framework for building a state machine;
 - Trace: simple console logging with predefined levels and customizable component names;
