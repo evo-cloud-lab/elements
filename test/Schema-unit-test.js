@@ -85,6 +85,13 @@ describe('Schema', function () {
         });
     });
     
+    describe('#validators notOf', function () {
+        it('#validate', function () {
+           assert.ok(Schema.accept({ v: { notOf: [1, 2, 3] } }, { v: 2 }) instanceof Error);
+           assert.deepEqual(Schema.accept({ v: { notOf: [1,2, 3] } }, { v: 4 }), { v: 4 });
+        });
+    });
+    
     describe('#validators range', function () {
         it('single range', function () {
             assert.deepEqual(Schema.accept({ key: { range: [13, 26] } }, { key: 18 }), { key: 18 });
