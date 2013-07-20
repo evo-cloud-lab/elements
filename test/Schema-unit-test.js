@@ -182,5 +182,34 @@ describe('Schema', function () {
             assert.strictEqual(Schema.validate({ empty: false }, 0), 0);
             assert.strictEqual(Schema.validate({ empty: false }, false), false);
         });        
-    });         
+    });
+    
+    describe('options', function () {
+        it('error with attribute name', function () {
+            var err;
+            try {
+                Schema.accept({ name: String }, { name: null }, 'prefix');
+            } catch (e) {
+                err = e;
+            }
+            assert.ok(err);
+            assert.equal(err.attr, 'prefix.name');
+            
+            try {
+                Schema.accept({ name: String }, { name: null }, { attr: 'prefix' });
+            } catch (e) {
+                err = e;
+            }
+            assert.ok(err);
+            assert.equal(err.attr, 'prefix.name');
+        });
+        
+        it('accept all attributes', function () {
+            var data = Schema.accept({ name: String }, { name: 'name', value: 123 });
+            assert.deepEqual(data, { name: 'name' });
+
+            data = Schema.accept({ name: String }, { name: 'name', value: 123 }, { all: true });
+            assert.deepEqual(data, { name: 'name', value: 123 });
+        });
+    });
 });
