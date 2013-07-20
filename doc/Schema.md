@@ -27,7 +27,15 @@ Then use the schema to normalize data:
 var normalized = Schema.accept(MySchema, { ... });
 ```
 
-When validation fails, unified error (see Errors) is thrown.
+When validation fails, unified error (see Errors) is returned.
+To throw error instead of returning it, append `throws` to options:
+
+```javascript
+var normalized = Schema.accept(MySchema, { ... }, { throws: true });
+```
+
+Normally, only attributes defined in schema will be accepted, others are dropped.
+To include undefined attributes as well, append `all` to options. E.g. `{ all: true }`.
 
 To extend with your own validator:
 
@@ -36,7 +44,7 @@ Schema.validators['identity'] = function (identity, options, value, attrName) {
     if (value.match(identity)) {
         return value;
     }
-    throw Errors.badAttr(attrName, value);
+    return Errors.badAttr(attrName, value);
 };
 ```
 

@@ -9,8 +9,8 @@ describe('Schema', function () {
         assert.strictEqual(Schema.validate(Number, 1), 1);
         assert.strictEqual(Schema.validate(Boolean, true), true);
         assert.deepEqual(Schema.validate(Array, ['abc']), ['abc']);
-        assert.throws(function () { Schema.validate(String, null); });
-        assert.throws(function () { Schema.validate(Number, 'abc'); });
+        assert.ok(Schema.validate(String, null) instanceof Error);
+        assert.throws(function () { Schema.validate(Number, 'abc', { throws: true }); });
     });
     
     it('#validate with strings', function () {
@@ -21,16 +21,16 @@ describe('Schema', function () {
         assert.strictEqual(Schema.validate('float', 1.1), 1.1);
         assert.strictEqual(Schema.validate('boolean', true), true);
         assert.deepEqual(Schema.validate('array', ['abc']), ['abc']);
-        assert.throws(function () { Schema.validate('string', null); });
-        assert.throws(function () { Schema.validate('number', 'abc'); });
-        assert.throws(function () { Schema.validate('int', 'abc'); });
-        assert.throws(function () { Schema.validate('integer', 'abc'); });
-        assert.throws(function () { Schema.validate('float', 'abc'); });
+        assert.ok(Schema.validate('string', null) instanceof Error);
+        assert.ok(Schema.validate('number', 'abc') instanceof Error);
+        assert.ok(Schema.validate('int', 'abc') instanceof Error);
+        assert.ok(Schema.validate('integer', 'abc') instanceof Error);
+        assert.ok(Schema.validate('float', 'abc') instanceof Error);
     });
 
     it('#validate with array', function () {
         assert.strictEqual(Schema.validate([3, 6, 9], 6), 6);
-        assert.throws(function () { Schema.validate([3, 6, 9], 0); });
+        assert.throws(function () { Schema.validate([3, 6, 9], 0, { throws: true }); });
     });
     
     it('#validate nested schema', function () {
@@ -54,11 +54,7 @@ describe('Schema', function () {
                 }
             }
         );
-        assert.throws(function () {
-            Schema.accept(schema, {
-                info: { }
-            });
-        });
+        assert.ok(Schema.accept(schema, { info: { } }) instanceof Error);
     });
     
     describe('#validators type', function () {
@@ -68,14 +64,14 @@ describe('Schema', function () {
             var result = Schema.accept({ key: MyClass }, { key: object });
             assert.ok(result.key instanceof MyClass);
             assert.throws(function () {
-                Schema.accept({ key: MyClass }, { key: {} });
+                Schema.accept({ key: MyClass }, { key: {} }, { throws: true });
             });
         });
         
         it('array auto convertion', function () {
             assert.deepEqual(Schema.accept({ key: Array }, { key: 123 }), { key: [123] });
             assert.throws(function () {
-                Schema.accept({ key: { type: 'array', strict: true } }, { key: 123 });
+                Schema.accept({ key: { type: 'array', strict: true } }, { key: 123 }, { throws: true });
             });
         });
     });
@@ -84,7 +80,7 @@ describe('Schema', function () {
         it('#validate', function () {
             assert.deepEqual(Schema.accept({ key: { fn: function (opts, value) { return value + 100; } } }, { key: 10 }), { key: 110 });
             assert.throws(function () {
-                Schema.accept({ key: { fn: function () { throw new Error('error'); } } }, { key: 100 });
+                Schema.accept({ key: { fn: function () { throw new Error('error'); } } }, { key: 100 }, { throws: true });
             });
         });
     });
@@ -95,14 +91,14 @@ describe('Schema', function () {
             assert.deepEqual(Schema.accept({ key: { range: [13, 26] } }, { key: 13 }), { key: 13 });
             assert.deepEqual(Schema.accept({ key: { range: [13, 26] } }, { key: 26 }), { key: 26 });            
             assert.throws(function () {
-                Schema.accept({ key: { range: [20, 26] } }, { key: 19 });
+                Schema.accept({ key: { range: [20, 26] } }, { key: 19 }, { throws: true });
             });
         });
         
         it('ranges', function () {
             assert.deepEqual(Schema.accept({ key: { range: [[13, 26], [78, 91]] } }, { key: 80 }), { key: 80 });
             assert.throws(function () {
-                Schema.accept({ key: { range: [[20, 26], [91, 99]] } }, { key: 18 });
+                Schema.accept({ key: { range: [[20, 26], [91, 99]] } }, { key: 18 }, { throws: true });
             });            
         });
     });
@@ -113,17 +109,17 @@ describe('Schema', function () {
             assert.strictEqual(Schema.validate({ presence: true }, ''), '');            
             assert.strictEqual(Schema.validate({ presence: true }, 0), 0);
             assert.strictEqual(Schema.validate({ presence: true }, false), false);            
-            assert.throws(function () { Schema.validate({ presence: true }, undefined); });
-            assert.throws(function () { Schema.validate({ presence: true }, null); });
+            assert.throws(function () { Schema.validate({ presence: true }, undefined, { throws: true }); });
+            assert.throws(function () { Schema.validate({ presence: true }, null, { throws: true }); });
         });
 
         it('false', function () {
             assert.strictEqual(Schema.validate({ presence: false }, null), null);
             assert.strictEqual(Schema.validate({ presence: false }, undefined), undefined);
-            assert.throws(function () { Schema.validate({ presence: false }, 1); });
-            assert.throws(function () { Schema.validate({ presence: false }, 0); });            
-            assert.throws(function () { Schema.validate({ presence: false }, ''); });            
-            assert.throws(function () { Schema.validate({ presence: false }, false); });
+            assert.throws(function () { Schema.validate({ presence: false }, 1, { throws: true }); });
+            assert.throws(function () { Schema.validate({ presence: false }, 0, { throws: true }); });            
+            assert.throws(function () { Schema.validate({ presence: false }, '', { throws: true }); });            
+            assert.throws(function () { Schema.validate({ presence: false }, false, { throws: true }); });
         });        
     });
     
@@ -134,7 +130,7 @@ describe('Schema', function () {
             assert.strictEqual(Schema.validate({ required: true }, 0), 0);
             assert.strictEqual(Schema.validate({ required: true }, false), false);
             assert.strictEqual(Schema.validate({ required: true }, null), null);                        
-            assert.throws(function () { Schema.validate({ required: true }, undefined); });
+            assert.throws(function () { Schema.validate({ required: true }, undefined, { throws: true }); });
         });
 
         it('false', function () {
@@ -156,8 +152,8 @@ describe('Schema', function () {
         });
 
         it('false', function () {
-            assert.throws(function () { Schema.validate({ nullable: false }, null); });
-            assert.throws(function () { Schema.validate({ nullable: false }, undefined); });            
+            assert.throws(function () { Schema.validate({ nullable: false }, null, { throws: true }); });
+            assert.throws(function () { Schema.validate({ nullable: false }, undefined, { throws: true }); });            
             assert.strictEqual(Schema.validate({ nullable: false }, 1), 1);
             assert.strictEqual(Schema.validate({ nullable: false }, 0), 0);
             assert.strictEqual(Schema.validate({ nullable: false }, ''), '');
@@ -175,9 +171,9 @@ describe('Schema', function () {
         });
 
         it('false', function () {
-            assert.throws(function () { Schema.validate({ empty: false }, ''); });
-            assert.throws(function () { Schema.validate({ empty: false }, null); });            
-            assert.throws(function () { Schema.validate({ empty: false }, undefined); });            
+            assert.throws(function () { Schema.validate({ empty: false }, '', { throws: true }); });
+            assert.throws(function () { Schema.validate({ empty: false }, null, { throws: true }); });            
+            assert.throws(function () { Schema.validate({ empty: false }, undefined, { throws: true }); });            
             assert.strictEqual(Schema.validate({ empty: false }, 1), 1);
             assert.strictEqual(Schema.validate({ empty: false }, 0), 0);
             assert.strictEqual(Schema.validate({ empty: false }, false), false);
@@ -186,21 +182,12 @@ describe('Schema', function () {
     
     describe('options', function () {
         it('error with attribute name', function () {
-            var err;
-            try {
-                Schema.accept({ name: String }, { name: null }, 'prefix');
-            } catch (e) {
-                err = e;
-            }
-            assert.ok(err);
+            var err = Schema.accept({ name: String }, { name: null }, 'prefix');
+            assert.ok(err instanceof Error);
             assert.equal(err.attr, 'prefix.name');
             
-            try {
-                Schema.accept({ name: String }, { name: null }, { attr: 'prefix' });
-            } catch (e) {
-                err = e;
-            }
-            assert.ok(err);
+            err = Schema.accept({ name: String }, { name: null }, { attr: 'prefix' });
+            assert.ok(err instanceof Error);
             assert.equal(err.attr, 'prefix.name');
         });
         
