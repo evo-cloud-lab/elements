@@ -38,17 +38,17 @@ describe('Logger', function () {
     });
     
     it('default level from config', function () {
-        var cfg = new Config().parse(['-D', 'logger.default.level=error']);
+        var cfg = new Config().parse(['-D', 'logger.level=error']);
         verifyLogLevel(createLogger(cfg, 'name'), 'error');
     });
     
     it('level from named config', function () {
-        var cfg = new Config().parse(['-D', 'logger.default.level=error', '-D', 'logger.name.level=debug']);
+        var cfg = new Config().parse(['-D', 'logger.level=error', '-D', 'logger.components.name.level=debug']);
         verifyLogLevel(createLogger(cfg, 'name'), 'debug');
     });
     
     it('fallback to default level with invalid level name', function () {
-        var cfg = new Config().parse(['-D', 'logger.default.level=invalid']);
+        var cfg = new Config().parse(['-D', 'logger.level=invalid']);
         verifyLogLevel(createLogger(cfg, 'name'), Logger.DEFAULT_LEVEL);        
     });
 });

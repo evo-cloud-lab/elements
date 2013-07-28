@@ -76,6 +76,24 @@ describe('Schema', function () {
         });
     });
     
+    describe('#validators array', function () {
+        it('#validate', function () {
+            assert.ok(Schema.accept({ v: { array: 'integer' } }, { v: 1 }) instanceof Error);
+            assert.ok(Schema.accept({ v: { array: 'integer' } }, { v: ['a'] }) instanceof Error);
+            assert.deepEqual(Schema.accept({ v: { array: 'integer' } }, { v: [1] }), { v: [1] });
+        });
+    });
+
+    describe('#validators len', function () {
+        it('#validate', function () {
+            assert.ok(Schema.accept({ v: { len: 3 } }, { v: 1 }) instanceof Error);
+            assert.ok(Schema.accept({ v: { len: 3 } }, { }) instanceof Error);
+            assert.ok(Schema.accept({ v: { len: 3 } }, { v: [1, 2, 3, 4] }) instanceof Error);
+            assert.deepEqual(Schema.accept({ v: { len: 3 } }, { v: [1, 2, 3] }), { v: [1, 2, 3] });
+            assert.deepEqual(Schema.accept({ v: { len: 3 } }, { v: "123" }), { v: "123" });
+        });
+    });
+    
     describe('#validators fn', function () {
         it('#validate', function () {
             assert.deepEqual(Schema.accept({ key: { fn: function (opts, value) { return value + 100; } } }, { key: 10 }), { key: 110 });
