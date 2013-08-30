@@ -10,11 +10,11 @@ describe('StateMachine', function () {
             this.seqs = seqs;
             this.name = name;
         },
-        
+
         enter: function () {
             this._log('enter', [].slice.call(arguments, 1));
         },
-        
+
         leave: function () {
             this._log('leave', arguments);
         },
@@ -22,7 +22,7 @@ describe('StateMachine', function () {
         process: function () {
             this._log('process', [].slice.call(arguments, 1));
         },
-        
+
         _log: function (method, args) {
             this.seqs.push(this.name + '.' + method + '(' + [].join.call(args, ',') + ')');
         }
@@ -34,7 +34,7 @@ describe('StateMachine', function () {
             constructor: function () {
                 LogState.prototype.constructor.call(this, seqs, 'S1');
             },
-            
+
             enter: function (transit, count) {
                 LogState.prototype.enter.apply(this, arguments);
                 this.count = count;
@@ -49,19 +49,19 @@ describe('StateMachine', function () {
                 transit.apply(null, args);
             }
         });
-        
+
         var State2 = Class(LogState, {
             constructor: function () {
                 LogState.prototype.constructor.call(this, seqs, 'S2');
             },
-            
+
             enter: function (transit) {
                 LogState.prototype.enter.apply(this, arguments);
                 this.items = [].slice.call(arguments, 1);
                 this.index = 0;
                 this.sum = 0;
             },
-            
+
             process: function (transit, value) {
                 LogState.prototype.process.apply(this, arguments);
                 this.sum += this.items[this.index] * value;
@@ -71,23 +71,23 @@ describe('StateMachine', function () {
                 }
             }
         });
-        
+
         var State3 = Class(LogState, {
             constructor: function () {
                 LogState.prototype.constructor.call(this, seqs, 'S3');
             },
-            
+
             enter: function (transit, sum) {
                 LogState.prototype.enter.apply(this, arguments);
-                transit('complete', sum * 2);                
+                transit('complete', sum * 2);
             }
         });
-        
+
         var State4 = Class(LogState, {
             constructor: function () {
                 LogState.prototype.constructor.call(this, seqs, 'S4');
             },
-            
+
             enter: function (transit, sum, final) {
                 LogState.prototype.enter.apply(this, arguments);
                 if (!final) {
@@ -129,32 +129,36 @@ describe('StateMachine', function () {
             'S3.enter(' + (20 + 44 + 12 * 6 + 13 * 8 + 140) + ')',
             'S3.leave(s4)',
             'S4.enter(' + ((20 + 44 + 12 * 6 + 13 * 8 + 140) * 2) + ')',
-            'S4.leave(s4)',
-            'S4.enter(' + ((20 + 44 + 12 * 6 + 13 * 8 + 140) * 4) + ',true)'
+            //'S4.leave(s4)',
+            //'S4.enter(' + ((20 + 44 + 12 * 6 + 13 * 8 + 140) * 4) + ',true)'
         ]);
         assert.equal(sm.currentName, 's4');
         assert.equal(sm.current.name, 'S4');
     });
-    
+
     it('loop transition', function () {
         this.timeout(60000);
+        var state = {
+            enter: function (transit, count) {
+                if (!count) {
+                    count = 1;
+                } else {
+                    count ++;
+                }
+                if (count < 100000) {
+                    transit('any', count);
+                } else {
+                    transit('done', count);
+                }
+            }
+        };
         var sm = new StateMachine()
-                .state('s', {
-                    enter: function (transit, count) {
-                        if (!count) {
-                            count = 1;
-                        } else {
-                            count ++;
-                        }
-                        if (count < 100000) {
-                            transit('any', count);
-                        } else {
-                            transit('done', count);
-                        }
-                    }
-                })
+                .state('s0', Object.create(state))
                     .when('done').to('final')
-                    .fallback('s')
+                    .fallback('s1')
+                .state('s1', Object.create(state))
+                    .when('done').to('final')
+                    .fallback('s0')
                 .state('final', {
                     enter: function (transit, count) {
                         this.count = count;
@@ -164,7 +168,7 @@ describe('StateMachine', function () {
         assert.equal(sm.currentName, 'final');
         assert.equal(sm.getState('final').count, 100000);
     });
-    
+
     it('asynchronous transition', function (done) {
         var s1 = {
             enter: function (transit, initialVal) {
@@ -173,25 +177,25 @@ describe('StateMachine', function () {
                 }, 10);
             }
         };
-        
+
         var s2 = {
             enter: function (transit, value) {
                 this.value = value;
             },
-            
+
             process: function (transit, value) {
                 setTimeout(function () {
-                    transit('done', this.value + value);                    
+                    transit('done', this.value + value);
                 }.bind(this), 10);
             }
         };
-        
+
         var s3 = {
             enter: function (transit, result) {
                 this.result = result;
             }
         };
-        
+
         new StateMachine()
             .state('s1', s1)
                 .when('loaded').to('s2')
@@ -209,7 +213,21 @@ describe('StateMachine', function () {
         })
         .start(100);
     });
-    
+
+    it('transit to the same state', function () {
+        var enters = 0;
+        var sm = new StateMachine()
+            .state('s', {
+                enter: function (transit) {
+                    enters ++;
+                }
+            })
+                .when('key').to('s');
+        sm.start();
+        sm.transit('key');
+        assert.equal(enters, 1);
+    });
+
     it('invalid transition rules', function () {
         assert.throws(function () {
             new StateMachine()
