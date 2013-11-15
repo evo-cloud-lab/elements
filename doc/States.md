@@ -1,29 +1,52 @@
 ### States
 
-A simple state machine.
+Consolidating the difference between current state and expected state.
+
+To use this class, define a sub-class with a bunch of methods following the naming convention:
 
 ```javascript
-var states = new States(initialState);
-states.transit(newState);
-states.from(currState).transit(newState)
+'currentState:expectedState': function () {
+    ...
+    return ['validState1', 'validState2', ...];
+}
 ```
 
-- `initialState`: optional, initialize the state machine with the provided state.
-- `newState`: the next state to switch to. It can be an object or a function. 
-              If it is a function, it gets invoked when transit happens and 
-              is expected to return the new state object.
-- `currState`: used with `from` to assert current state must be currState, otherwise `transit` will not happen.
-
-A state object can provides two methods: `enter` and `leave`, both are optional.
+The instance accepts an expectation, and invoke the corresponding method to solve the difference
+between current state and expected state. E.g.
 
 ```javascript
-state.enter(previousState)
+
+var MyStates = Class({
+    constructor: function (machine) {
+        States.prototype.constructor.call(this, machine.state);
+        this.machine = machine;
+        this.machine.on('state', function (state) {
+            this.current = state;
+        }.bind(this));
+    },
+
+    'idle:running': function () {
+        ...
+        this.machine.prepare();
+        ...
+        return ['preparing', 'prepared', 'running'];
+    },
+
+    'prepared:running': function () {
+        this.machine.start();
+        return ['starting', 'running'];
+    }
+});
+
+var m = new Machine();
+...
+var s = new MyStates(m);
+s.setExpectation('running');
 ```
 
-Expects returning a state object for next state. If it is different from current state, transition keeps runing.
+In the example above, if the current state of machine is `idle`,
+the machine will go through `preparing`, `prepared`, `starting`, and finally reaches `running`.
 
-```javascript
-state.leave(nextState)
-```
-
-Invoked when the state machine transits to `nextState` before invoking `nextState.enter`.
+In case the machine needs fix and fails after transits to `starting`, it will turn to `stopped`
+but not `running`. Then MyStates will find `stopped` is not in valid states, `error` is raised
+for consoliation failure. Current state is still accepted and expectation is cleared.
