@@ -91,4 +91,65 @@ describe('States', function () {
         }).setExpectation('state2');
         assert.equal(s.expectation, 'state2');
     });
+
+    describe('resolve once', function () {
+        var s, transits;
+
+        function multiExpectations(done) {
+            s.on('done', function () {
+                Try.final(function () {
+                    assert.equal(s.current, 'state1');
+                    assert.deepEqual(transits, ['state1']);
+                    assert.equal(s.expectation, null);
+                }, done);
+            });
+            s.setExpectation('state1');
+            s.setExpectation('state2');
+            s.setExpectation('state1');
+            assert.equal(s.expectation, 'state1');
+        }
+
+        function multiStates(done) {
+            s.on('done', function () {
+                Try.final(function () {
+                    assert.equal(s.current, 'state2');
+                    assert.deepEqual(transits, ['state2']);
+                    assert.equal(s.expectation, null);
+                }, done);
+            });
+            s.setExpectation('state2');
+            s.current = 'state1';
+            s.current = 'state2';
+            s.current = 'init';
+            s.current = 'state1';
+        }
+
+        describe('async transit', function () {
+            beforeEach(function () {
+                s = new TestStates('init');
+                transits = [];
+                s._transit = function (nextState) {
+                    transits.push(nextState);
+                    s.current = nextState;
+                };
+            });
+
+            it ('set expectations multiple times', multiExpectations);
+            it ('set states multiple times', multiStates);
+        });
+
+        describe('sync transit', function () {
+            beforeEach(function () {
+                s = new TestStates('init');
+                transits = [];
+                s.transit = function (nextState) {
+                    transits.push(nextState);
+                    s.current = nextState;
+                };
+            });
+
+            it ('set expectations multiple times', multiExpectations);
+            it ('set states multiple times', multiStates);
+        });
+    });
 });
