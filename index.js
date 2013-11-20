@@ -8,5 +8,6 @@ module.exports = {
     StateMachine: require('./lib/StateMachine'),
     States:       require('./lib/States'),
     Trace:        require('./lib/Trace'),
-    Try:          require('./lib/Try')
+    Try:          require('./lib/Try'),
+    Cli:          require('./lib/Cli')
 };
