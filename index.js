@@ -1,5 +1,6 @@
 module.exports = {
     BiMap:        require('./lib/BiMap'),
+    Catalog:      require('./lib/Catalog'),
     Config:       require('./lib/Config'),
     DelayedJob:   require('./lib/DelayedJob'),
     Errors:       require('./lib/Errors'),
@@ -9,5 +10,6 @@ module.exports = {
     States:       require('./lib/States'),
     Trace:        require('./lib/Trace'),
     Try:          require('./lib/Try'),
+    Utils:        require('./lib/Utils'),
     Cli:          require('./lib/Cli')
 };
