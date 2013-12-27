@@ -38,4 +38,8 @@ describe('Utils', function () {
                          [[{k:3}, {k:9}], [{k:7}, {k:65}]]);
     });
 
+    it('#diff with common items', function () {
+        assert.deepEqual(Utils.diff([3, 8, 9, 10], [7, 8, 10, 65], { sorted: true, common: true }),
+                         [[3, 9], [7, 65], [8, 10]]);
+    });
 });
