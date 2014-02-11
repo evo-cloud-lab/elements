@@ -5,6 +5,7 @@ module.exports = {
     DelayedJob:   require('./lib/DelayedJob'),
     Errors:       require('./lib/Errors'),
     Logger:       require('./lib/Logger'),
+    Plugins:      require('./lib/Plugins'),
     Range:        require('./lib/Range'),
     Schema:       require('./lib/Schema'),
     StateMachine: require('./lib/StateMachine'),
