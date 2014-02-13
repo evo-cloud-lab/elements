@@ -1,6 +1,6 @@
 var assert = require('assert'),
 
-    Utils = require('../index').Utils;
+    Utils = require('..').Utils;
 
 describe('Utils', function () {
     it('#sort values', function () {

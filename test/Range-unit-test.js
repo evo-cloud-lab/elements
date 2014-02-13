@@ -1,6 +1,6 @@
 var assert = require('assert'),
 
-    Range = require('../index').Range;
+    Range = require('..').Range;
 
 describe('Range', function () {
     it('#constructor validates parameters', function () {
@@ -90,6 +90,20 @@ describe('Range', function () {
         assert.equal(new Range(1, 3).cover(2), true);
         assert.equal(new Range(1, 3).cover(3), false);
         assert.equal(new Range(1, 3).cover(4), false);
+    });
+
+    it('#equal', function () {
+        assert.equal(new Range(2, 4).equal(new Range(2, 4)), true);
+        assert.equal(new Range(2, 4).equal(new Range(0, 1)), false);
+        assert.equal(new Range(2, 4).equal(new Range(1, 2)), false);
+        assert.equal(new Range(2, 4).equal(new Range(1, 3)), false);
+        assert.equal(new Range(2, 4).equal(new Range(1, 4)), false);
+        assert.equal(new Range(2, 4).equal(new Range(1, 5)), false);
+        assert.equal(new Range(2, 4).equal(new Range(2, 3)), false);
+        assert.equal(new Range(2, 4).equal(new Range(2, 5)), false);
+        assert.equal(new Range(2, 4).equal(new Range(3, 4)), false);
+        assert.equal(new Range(2, 4).equal(new Range(3, 5)), false);
+        assert.equal(new Range(2, 4).equal(new Range(4, 5)), false);
     });
 
     it('#merge', function () {

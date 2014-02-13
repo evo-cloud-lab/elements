@@ -1,6 +1,6 @@
 var assert = require('assert'),
 
-    Catalog = require('../index').Catalog;
+    Catalog = require('..').Catalog;
 
 describe('Catalog', function () {
     it('#add', function () {

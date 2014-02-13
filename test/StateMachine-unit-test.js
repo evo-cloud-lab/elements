@@ -2,7 +2,7 @@ var assert  = require('assert'),
     Class   = require('js-class'),
     Try     = require('../lib/Try'),
 
-    StateMachine = require('../lib/StateMachine');
+    StateMachine = require('..').StateMachine;
 
 describe('StateMachine', function () {
     var LogState = Class({

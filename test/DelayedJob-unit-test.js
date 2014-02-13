@@ -1,7 +1,7 @@
 var assert = require('assert'),
 
     Try = require('../lib/Try'),
-    DelayedJob = require('../lib/DelayedJob');
+    DelayedJob = require('..').DelayedJob;
 
 describe('DelayedJob', function () {
     it('collects all changes', function (done) {

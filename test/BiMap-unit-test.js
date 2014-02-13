@@ -1,14 +1,14 @@
 var assert = require('assert'),
-    
-    BiMap = require('../lib/BiMap');
-    
+
+    BiMap = require('..').BiMap;
+
 describe('BiMap', function () {
     var bimap;
-    
+
     beforeEach(function () {
         bimap = new BiMap('a1', 'a2');
     });
-    
+
     it('#add', function () {
         assert.deepEqual(bimap.names, ['a1', 'a2']);
         bimap.add('k1', 'k2');
@@ -20,7 +20,7 @@ describe('BiMap', function () {
         assert.strictEqual(bimap.maps[1]['k2']['k3'], undefined);
         assert.strictEqual(bimap.maps[1]['k3']['k2'], undefined);
     });
-    
+
     it('add with simple value', function () {
         bimap.add('k1', 'k2', 'value');
         assert.equal(bimap.get('k1', 'k2'), 'value');
@@ -41,7 +41,7 @@ describe('BiMap', function () {
             bimap.add('k1', 'k2', { val: 80 }, true);
         }, /not mergable/i);
     });
-    
+
     it('add with a function as data provider', function () {
         var origs = [];
         bimap.add('k1', 'k2', function (origData) { origs.push(origData); return 1; });
@@ -49,12 +49,12 @@ describe('BiMap', function () {
         assert.equal(bimap.get('k1', 'k2'), 2);
         assert.deepEqual(origs, [undefined, 1]);
     });
-    
+
     it('#remove', function () {
         bimap
             .add('k1', 'k2')
             .add('k1', 'k3')
-            .remove('k1', 'k2');       
+            .remove('k1', 'k2');
         assert.strictEqual(bimap.maps[0]['k1']['k2'], undefined);
         assert.strictEqual(bimap.maps[1]['k2'], undefined);
         assert.ok(bimap.maps[0]['k1']['k3']);
@@ -63,7 +63,7 @@ describe('BiMap', function () {
         assert.strictEqual(bimap.maps[0]['k1'], undefined);
         assert.strictEqual(bimap.maps[1]['k3'], undefined);
     });
-    
+
     it('#removeAll', function () {
         bimap
             .add('k1', 'k2')
@@ -73,7 +73,7 @@ describe('BiMap', function () {
         assert.strictEqual(bimap.maps[1]['k2'], undefined);
         assert.strictEqual(bimap.maps[1]['k3'], undefined);
     });
-    
+
     it('#all', function () {
         bimap
             .add('k1', 'k2')
@@ -81,7 +81,7 @@ describe('BiMap', function () {
         assert.ok(bimap.all('k1', 'a1')['k2']);
         assert.ok(bimap.all('k1', 'a1')['k3']);
     });
-    
+
     it('#keys', function () {
         bimap
             .add('k1', 'k2')
@@ -89,17 +89,17 @@ describe('BiMap', function () {
         assert.deepEqual(bimap.keys('k1', 'a1'), ['k2', 'k3']);
         assert.deepEqual(bimap.keys('none', 'a1'), []);
     });
-    
+
     it('#map', function () {
         assert.strictEqual(bimap.map('a1'), bimap.maps[0]);
         assert.strictEqual(bimap.map('a2'), bimap.maps[1]);
     });
-    
+
     it('throws with invalid key name', function () {
         ['removeAll', 'all', 'keys'].forEach(function (method) {
             assert.throws(function () {
                 bimap[method]('k', 'none');
-            }, /invalid key name/i);            
+            }, /invalid key name/i);
         });
         assert.throws(function () {
             bimap.map('none');

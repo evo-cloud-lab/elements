@@ -2,7 +2,7 @@ var assert = require('assert'),
     Class  = require('js-class'),
     Try    = require('../lib/Try'),
 
-    States = require('../lib/States');
+    States = require('..').States;
 
 describe('States', function () {
     var TestStates = Class(States, {
