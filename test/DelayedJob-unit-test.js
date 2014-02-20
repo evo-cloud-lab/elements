@@ -1,6 +1,6 @@
 var assert = require('assert'),
 
-    Try = require('../lib/Try'),
+    Try = require('js-flow').Try,
     DelayedJob = require('..').DelayedJob;
 
 describe('DelayedJob', function () {

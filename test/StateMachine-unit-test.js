@@ -1,6 +1,6 @@
 var assert  = require('assert'),
     Class   = require('js-class'),
-    Try     = require('../lib/Try'),
+    Try     = require('js-flow').Try,
 
     StateMachine = require('..').StateMachine;
 
