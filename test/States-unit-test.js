@@ -82,8 +82,8 @@ describe('States', function () {
         };
         s.on('error', function (err) {
             Try.final(function () {
-                assert.equal(err.expectation, 'state2');
-                assert.equal(err.actual, 'init');
+                assert.equal(err.expected, 'state2');
+                assert.equal(err.state, 'init');
                 assert.deepEqual(err.accepts, ['state2']);
                 assert.equal(s.current, 'init');
                 assert.equal(s.expectation, null);
@@ -150,6 +150,61 @@ describe('States', function () {
 
             it ('set expectations multiple times', multiExpectations);
             it ('set states multiple times', multiStates);
+        });
+    });
+
+    describe('async fn', function () {
+        var TestStates = Class(States, {
+            constructor: function () {
+                States.prototype.constructor.apply(this, arguments);
+            },
+
+            'init:state1': function (expected, current, done) {
+                setImmediate(function () {
+                    this.transit('state1', function () {
+                        done(null, ['state1']);
+                    });
+                }.bind(this));
+            },
+
+            'init:state2': function () {
+                this.transit('state1');
+                return ['state1', 'state2'];
+            },
+
+            'state1:state2': function () {
+                this.transit('state2');
+                return ['state2'];
+            },
+
+            transit: function (nextState, done) {
+                process.nextTick(function () {
+                    this._transit(nextState, done);
+                }.bind(this));
+            },
+
+            _transit: function (nextState, done) {
+                this.current = nextState;
+                done();
+            }
+        });
+
+        it ('simple transit', function (done) {
+            var s = new TestStates('init');
+            var transits = [];
+            s._transit = function (nextState, done) {
+                transits.push(nextState);
+                s.current = nextState;
+                done();
+            };
+            s.on('done', function () {
+                Try.final(function () {
+                    assert.equal(s.current, 'state1');
+                    assert.deepEqual(transits, ['state1']);
+                    assert.equal(s.expectation, null);
+                }, done);
+            }).setExpectation('state1');
+            assert.equal(s.expectation, 'state1');
         });
     });
 });
